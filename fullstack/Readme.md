@@ -27,3 +27,8 @@ Finally added some code to index.js and config/database.js and executed followin
 - nodemon index
 
 This started server in port 5000
+
+16-02-2024:
+- Installed some packages in frontend via following commands
+    npm install @mui/material @emotion/react @emotion/styled
+    npm install @mui/icons-material
