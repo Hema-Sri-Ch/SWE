@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS feedback_questions;
 DROP TABLE IF EXISTS electives;
 DROP TABLE IF EXISTS student_courses;
 DROP TABLE IF EXISTS instructor_courses;
+DROP TABLE IF EXISTS messages;
 
 --user login table for user authentication
 
@@ -31,7 +32,9 @@ CREATE TABLE student_details(
 	user_name VARCHAR(50) NOT NULL,
 	semester VARCHAR(50),
 	department VARCHAR(50),
+	batch VARCHAR(50),
 	CGPA INTEGER,
+	isActive INTEGER,
 	PRIMARY KEY(user_id),
 	FOREIGN KEY (user_id, user_name) REFERENCES user_login (user_id, user_name)
 );
@@ -41,6 +44,7 @@ CREATE TABLE instructor_details(
 	user_name VARCHAR(50) NOT NULL,
 	department VARCHAR(50),
 	qualification VARCHAR(100),
+	isActive INTEGER,
 	PRIMARY KEY(user_id, user_name),
 	FOREIGN KEY(user_id, user_name) REFERENCES user_login (user_id, user_name)
 );
@@ -48,6 +52,7 @@ CREATE TABLE instructor_details(
 CREATE TABLE admin_details(
 	user_id VARCHAR(50) NOT NULL,
 	user_name VARCHAR(50) NOT NULL,
+	isActive INTEGER,
 	PRIMARY KEY(user_id),
 	FOREIGN KEY(user_id, user_name) REFERENCES user_login (user_id, user_name)
 );
@@ -68,11 +73,16 @@ CREATE TABLE course_details (
 	instructor_name VARCHAR(50),
 	instructor_id VARCHAR(50),
 	slot VARCHAR(50),
-	credits VARCHAR(50),
+	room VARCHAR(50),
+	credits INT,
+	max_students INT,
+	student_count INT,
 	course_description VARCHAR(255),
 	course_syllabus VARCHAR(255),
-	start_time VARCHAR(50),
-	end_time VARCHAR(50),
+	prereq_cids VARCHAR(20)[],
+	eligile_batches VARCHAR(20)[],
+	start_time DATE,
+	end_time DATE,
 	feedback_set_id INTEGER,
 	PRIMARY KEY (course_id),
 	FOREIGN KEY (instructor_id, instructor_name) REFERENCES instructor_details(user_id, user_name),
@@ -85,8 +95,25 @@ CREATE TABLE feedback_questions(
 	question_id SERIAL NOT NULL,
 	feedback_set_id INTEGER NOT NULL,
 	question VARCHAR(255),
+	ratings_count INT[],
 	PRIMARY KEY(question_id),
 	FOREIGN KEY(feedback_set_id) REFERENCES feedback_sets(id)
+);
+
+-- student messages
+CREATE TABLE messages (
+	msg_id SERIAL NOT NULL,
+	student_id VARCHAR(50) NOT NULL,
+	message VARCHAR(255),
+	instructor_id VARCHAR(50) NOT NULL,
+	instructor_name VARCHAR(50),
+	course_id VARCHAR(50),
+	course_name VARCHAR(255),
+	time TIMESTAMP,
+	PRIMARY KEY(msg_id),
+	FOREIGN KEY(student_id) REFERENCES student_details (user_id),
+	FOREIGN KEY(instructor_id, instructor_name) REFERENCES instructor_details (user_id, user_name),
+	FOREIGN KEY(course_id) REFERENCES course_details(course_id)
 );
 
 
@@ -123,10 +150,19 @@ CREATE TABLE instructor_courses(
 CREATE TABLE student_courses(
 	course_id VARCHAR(50),
 	student_id VARCHAR(50),
-	start_time VARCHAR(50),
-	end_time VARCHAR(50),
+	start_time DATE,
+	end_time DATE,
+	slot VARCHAR(50),
+	room VARCHAR(50),
+	type VARCHAR(50),
+	credits INT,
 	status VARCHAR(50),
 	grade VARCHAR(50),
 	FOREIGN KEY(student_id) REFERENCES student_details(user_id),
 	FOREIGN KEY(course_id) REFERENCES course_details(course_id)
 );
+
+
+-- Insert some default users
+INSERT INTO user_login(user_id, user_name, password, user_type) values ('AD__01', 'Admin A', '123123', 'AD');
+INSERT INTO admin_details values ('AD__01', 'Admin A', 1);
