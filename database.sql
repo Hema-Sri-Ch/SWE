@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS electives;
 DROP TABLE IF EXISTS student_courses;
 DROP TABLE IF EXISTS instructor_courses;
 DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS course_log;
 
 --user login table for user authentication
 
@@ -162,6 +163,18 @@ CREATE TABLE student_courses(
 	FOREIGN KEY(course_id) REFERENCES course_details(course_id)
 );
 
+CREATE TABLE course_log(
+	log_id SERIAL NOT NULL,
+	course_id VARCHAR(50),
+	isActive INT,
+	start_time DATE,
+	end_time DATE,
+	instructor_id VARCHAR(50),
+	instructor_name VARCHAR(50),
+	PRIMARY KEY(log_id),
+	FOREIGN KEY(course_id) REFERENCES course_details(course_id),
+	FOREIGN KEY(instructor_id, instructor_name) REFERENCES instructor_details (user_id, user_name)
+);
 
 -- Insert some default users
 INSERT INTO user_login(user_id, user_name, password, user_type) values ('AD__01', 'Admin A', '123123', 'AD');
