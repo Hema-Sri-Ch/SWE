@@ -3,6 +3,7 @@ CREATE DATABASE swe;
 \c swe
 
 -- drop pre existed tables to prevent conflicts
+DROP TABLE IF EXISTS batches;
 DROP TABLE IF EXISTS user_login;
 DROP TABLE IF EXISTS student_details;
 DROP TABLE IF EXISTS instructor_details;
@@ -14,14 +15,24 @@ DROP TABLE IF EXISTS electives;
 DROP TABLE IF EXISTS student_courses;
 DROP TABLE IF EXISTS instructor_courses;
 DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS receivers;
 DROP TABLE IF EXISTS course_log;
 
---user login table for user authentication
+-- batch a user could possible belong to
+CREATE TABLE batches(
+	batch_id VARCHAR(10) UNIQUE NOT NULL,
+	department VARCHAR(50),
+	year INT,
+	batch VARCHAR(50), --btech or mtech
+	PRIMARY KEY(batch_id)
+);
 
+--user login table for user authentication
 CREATE TABLE user_login (
 	user_id VARCHAR(50) UNIQUE NOT NULL,
 	user_name VARCHAR(50) NOT NULL,
 	password VARCHAR(255) NOT NULL,
+	user_mail VARCHAR(50) NOT NULL,
 	user_type VARCHAR(50) NOT NULL,
 	PRIMARY KEY(user_id, user_name)
 );
@@ -51,7 +62,7 @@ CREATE TABLE instructor_details(
 );
 
 CREATE TABLE admin_details(
-	user_id VARCHAR(50) NOT NULL,
+	user_id VARCHAR(50) UNIQUE NOT NULL,
 	user_name VARCHAR(50) NOT NULL,
 	isActive INTEGER,
 	PRIMARY KEY(user_id),
@@ -101,20 +112,23 @@ CREATE TABLE feedback_questions(
 	FOREIGN KEY(feedback_set_id) REFERENCES feedback_sets(id)
 );
 
--- student messages
+-- messages (sender side details)
 CREATE TABLE messages (
 	msg_id SERIAL NOT NULL,
-	student_id VARCHAR(50) NOT NULL,
 	message VARCHAR(255),
-	instructor_id VARCHAR(50) NOT NULL,
-	instructor_name VARCHAR(50),
-	course_id VARCHAR(50),
-	course_name VARCHAR(255),
+	user_id VARCHAR(50) NOT NULL,
 	time TIMESTAMP,
-	PRIMARY KEY(msg_id),
-	FOREIGN KEY(student_id) REFERENCES student_details (user_id),
-	FOREIGN KEY(instructor_id, instructor_name) REFERENCES instructor_details (user_id, user_name),
-	FOREIGN KEY(course_id) REFERENCES course_details(course_id)
+	PRIMARY KEY(msg_id),	
+	FOREIGN KEY(user_id) REFERENCES user_login(user_id)
+);
+
+-- receiver id to message id map (to prevent repition of message text sent to group)
+CREATE TABLE receivers (
+	msg_id INT NOT NULL,
+	user_id VARCHAR(50) NOT NULL,
+	PRIMARY KEY(msg_id, user_id),
+	FOREIGN KEY(msg_id) REFERENCES messages(msg_id),
+	FOREIGN KEY(user_id) REFERENCES user_login(user_id)
 );
 
 
@@ -175,7 +189,3 @@ CREATE TABLE course_log(
 	FOREIGN KEY(course_id) REFERENCES course_details(course_id),
 	FOREIGN KEY(instructor_id, instructor_name) REFERENCES instructor_details (user_id, user_name)
 );
-
--- Insert some default users
-INSERT INTO user_login(user_id, user_name, password, user_type) values ('AD__01', 'Admin A', '123123', 'AD');
-INSERT INTO admin_details values ('AD__01', 'Admin A', 1);
