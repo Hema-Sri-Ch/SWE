@@ -16,20 +16,37 @@ import {
     getFeedbackResult,
     getPrimaryCourseDetails,
     getCourseHistory,
+    getFeedbackForm1,
+    getFeedbackForm2,
+    getBatchUsers,
+    getCourses,
+    getActiveCourses,
+    getForms,
+    getMessageReceivers,
+    getReceivedMessages,
+    getSentMessages,
 } from "../controllers/display_info.js";
 
 const router = express.Router();
 
 
 router.post('/login', logIn);
-router.get('/userdetails', getUserDetails);
-router.get('/completedcourses', accessControl, getCompletedCourses);
-router.get('/registerdcourses', accessControl, getRegisteredCourses);
-router.get('/taughtcourses', accessControl, getTaughtCourses);
-router.get('/teachingcourses', accessControl, getTeachingCourses);
-router.get('/enrolledstudents', accessControl, getEnrolledStudents);
-router.get('/feedbackresponse', accessControl, getFeedbackResult);
-router.get('/coursedetails', accessControl, getPrimaryCourseDetails);
-router.get('/coursehistory', accessControl, getCourseHistory);
-
+router.get('/userdetails/:id', getUserDetails);
+router.get('/completedcourses/:id', accessControl, getCompletedCourses);
+router.get('/registerdcourses/:id', accessControl, getRegisteredCourses);
+router.get('/taughtcourses/:id', accessControl, getTaughtCourses);
+router.get('/teachingcourses/:id', accessControl, getTeachingCourses);
+router.get('/enrolledstudents/:cid', accessControl, getEnrolledStudents);
+router.get('/feedbackresponse/:cid', accessControl, getFeedbackResult);
+router.get('/coursedetails/:cid', accessControl, getPrimaryCourseDetails);
+router.get('/coursehistory/:cid', accessControl, getCourseHistory);
+router.get('/feedbackforms', accessControl, getForms);
+router.get('/feedbackforms/:cid', accessControl, getFeedbackForm1);
+router.get('/feedbackforms/:fid', accessControl, getFeedbackForm2);
+router.get('/batchusers', accessControl, getBatchUsers);
+router.get('/courses', accessControl, getCourses);
+router.get('/activecourses', accessControl, getActiveCourses);
+router.get('/receivedmessages/:id', accessControl, getReceivedMessages);
+router.get('/sentmessages/:id', accessControl, getSentMessages);
+router.get('/messagereceivers', accessControl, getMessageReceivers);
 export default router;

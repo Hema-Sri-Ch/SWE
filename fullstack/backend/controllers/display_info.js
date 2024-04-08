@@ -3,7 +3,7 @@ import { pool } from "../config/database.js";
 // Display Primary User Details
 export const getUserDetails = async (req, res) => {
     try {
-        
+        var myID = req.params.id;
         var userDetails;
         if(req.user_type = 0){
             userDetails = await pool.query('SELECT * FROM admin_details WHERE user_id=$1',[myID]);
@@ -36,7 +36,7 @@ export const getUserDetails = async (req, res) => {
 export const getCompletedCourses = async(req, res) => {
     try {
         if(req.user_type != 2) return res.status(403).send("Access Denied");
-        const myID = req.body.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
+        const myID = req.params.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
         const completedCourses = await pool.query("SELECT * FROM student_courses WHERE student_id=$1 AND status=1", [myID]);
         res.json(completedCourses.rows);
     } catch (err) {
@@ -50,7 +50,7 @@ export const getCompletedCourses = async(req, res) => {
 export const getRegisteredCourses = async(req, res) => {
     try {
         if(req.user_type != 2) return res.status(403).send("Access Denied");
-        const myID = req.body.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
+        const myID = req.params.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
         const registeredCourses = await pool.query("SELECT * FROM student_courses WHERE student_id=$1 AND status<1", [myID]);
         res.json(registeredCourses.rows);
     } catch(err) {
@@ -64,7 +64,7 @@ export const getRegisteredCourses = async(req, res) => {
 export const getTaughtCourses = async(req, res) => {
     try {
         if(req.user_type != 1) return res.status(403).send("Access Denied");
-        const myID = req.body.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
+        const myID = req.params.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
         const taughtCourses = await pool.query("SELECT * FROM instructor_courses WHERE instructor_id=$1 AND status=1", [myID]);
         res.json(taughtCourses.rows);
     } catch (err) {
@@ -78,7 +78,7 @@ export const getTaughtCourses = async(req, res) => {
 export const getTeachingCourses = async(req, res) => {
     try {
         if(req.user_type != 1) return res.status(403).send("Access Denied");
-        const myID = req.body.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
+        const myID = req.params.id; // TO BE MODIFIED AFTER COMPLETION OF AUTHERIZE MODULE
         const teachingCourses = await pool.query("SELECT * FROM instructor_courses WHERE instructor_id=$1 AND status<1", [myID]);
         res.json(teachingCourses.rows);
     } catch (err) {
@@ -92,7 +92,7 @@ export const getTeachingCourses = async(req, res) => {
 export const getPrimaryCourseDetails = async(req, res) => {
     try {
         if(req.user_type <= 2){
-            const cid = req.body.cid;
+            const cid = req.params.cid;
             const primaryCourseDetails = await pool.query('SELECT * FROM course_details WHERE course_id = $1', [cid]);
             // res.json(primaryCourseDetails.rows)
            
@@ -123,7 +123,7 @@ export const getPrimaryCourseDetails = async(req, res) => {
 export const getEnrolledStudents = async(req, res ) => {
     try {
         if(req.user_type < 2){
-            const cid = res.body.cid;
+            const cid = res.params.cid;
             const enrolledStudents = await pool.query("SELECT * FROM student_courses WHERE course_id=$1 and status<1", [cid]);
             res.json(enrolledStudents.rows);
         } else {
@@ -139,7 +139,7 @@ export const getEnrolledStudents = async(req, res ) => {
 export const getFeedbackResult = async(req, res) => {
     try{
         if(req.user_type < 2){
-            const cid = res.body.cid;
+            const cid = res.params.cid;
             const fid = await pool.query("SELECT feedback_response_id FROM course_details WHERE course_id=$1", [cid]);
 
             if(fid.rowCount == 0) {
@@ -166,7 +166,7 @@ export const getFeedbackResult = async(req, res) => {
 export const getCourseHistory = async(req, res) => {
     try {
         if(req.user_type == 0){
-            const Cid = req.body.cid; // TO BE MODIFIED PERHAPS
+            const Cid = req.params.cid; // TO BE MODIFIED PERHAPS
             //console.log(Cid);
             const courseLog = await pool.query("SELECT * FROM course_log WHERE course_id= $1", [Cid]);
 
@@ -195,5 +195,154 @@ export const getCourseHistory = async(req, res) => {
     } catch (err) {
         console.log(err.message);
         res.status(500).send("Server error");
+    }
+}
+
+// given course id get current feedback form id
+// used by students for feedback submission
+export const getFeedbackForm1 = async(req, res) => {
+    try {
+        if(req.user_type == 2){
+            const feedback_res_id = await pool.query("SELECT feedback_response_id FROM course_details WHERE course_id=$1", [req.params.cid]);
+            const feedback_id = await pool.query("SELECT feedback_set_id FROM feedback_responses WHERE id=$1", [feedback_res_id.rows[0]]);
+            const fid = feedback_id.rows[0];
+            const feedbackForm = await pool.query("SELECT * FROM feedback_sets WHERE id=$1", [fid]);
+            res.json(feedbackForm.rows[0]);
+        }
+
+        else {
+            res.status(403).send("Access Denied");
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+// fetch feedback form given feedback form id (used by admin)
+export const getFeedbackForm2 = async(req, res) => {
+    try {
+        if(req.user_type == 0){
+            const feedbackForm = await pool.query("SELECT * FROM feedback_sets WHERE id = $1", [req.params.fid]);
+            res.json(feedbackForm);
+        }
+        else{
+            res.status(403).send("Access Denied");
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+// get users given the batch
+export const getBatchUsers = async(req, res) => {
+    try {
+        if(req.user_type == 0){
+            const users = await pool.query("SELECT * FROM user_login WHERE user_id like " + `${req.body.bid}` + "%");
+            res.json(users.rows[0]);
+        }
+
+        else {
+            res.status(403).send("Access Denied");
+        }
+        
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).send("Server Error");
+    }
+}
+
+// get all courses
+export const getCourses = async(req, res) => {
+    try {
+        if(req.user_type == 0){
+            const courses = await pool.query("SELECT * FROM course_detials");
+            res.json(courses.rows);
+        }
+
+        else {
+            req.status(403).send("Access Denied");
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+// get active courses
+export const getActiveCourses = async(req, res) => {
+    try {
+        if(res.uesr_type == 0){
+            const activeCourses = await pool.query("SELECT * FROM course_detials WHERE status = 1");
+            res.json(activeCourses.rows);
+        }
+
+        else {
+            req.status(403).send("Access Denied");
+        }
+
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+// get all forms
+export const getForms = async(req, res) => {
+    try {
+        if(req.user_type == 0){
+            const formDetails = await pool.query("SELECT id, set_name FROM feedback_sets");
+            res.json(formDetails);
+        }
+
+        else {
+            res.status(403).send("Acces Denied");
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+// get messages received by given user
+export const getReceivedMessages = async(req, res) => {
+    try {
+        if(req.user_type <= 2){
+            const messages = await pool.query("SELECT * FROM messages WHERE msg_id IN (SELECT msg_id FROM receivers WHERE user_id=$1)", [req.params.id]);
+            res.json(messages.rows);
+        }
+        else res.status(403).send("Access Denied");
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+// fetch messages sent by admin or instructor
+export const getSentMessages = async(req, res) => {
+    try {
+        if(req.user_type < 2){
+            const messages = await pool.query("SELECT * FROM messages where user_id=$1", [req.params.id]);
+            res.json(messages.rows);
+        }
+        else{
+            res.status(403).send("Access Denied");
+        }
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
+    }
+}
+
+
+// fetch receiver user ids for a given message
+export const getMessageReceivers = async(req, res) => {
+    try {
+        const receivers = await pool.query("SELECT user_id FROM receivers WHERE msg_id=$1", [req.body.mid]);
+        res.json(receivers.rows);
+    } catch (err) {
+        console.log(err.message);
+        res.status(500).send("Server Error");
     }
 }
