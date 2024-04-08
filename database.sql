@@ -10,13 +10,14 @@ DROP TABLE IF EXISTS instructor_details;
 DROP TABLE IF EXISTS admin_details;
 DROP TABLE IF EXISTS feedback_sets;
 DROP TABLE IF EXISTS course_details;
-DROP TABLE IF EXISTS feedback_questions;
+DROP TABLE IF EXISTS feedback_responses;
 DROP TABLE IF EXISTS electives;
 DROP TABLE IF EXISTS student_courses;
 DROP TABLE IF EXISTS instructor_courses;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS receivers;
 DROP TABLE IF EXISTS course_log;
+DROP TABLE IF EXISTS custom_access_log;
 
 -- batch a user could possible belong to
 CREATE TABLE batches(
@@ -73,8 +74,40 @@ CREATE TABLE admin_details(
 CREATE TABLE feedback_sets(
 	id SERIAL NOT NULL,
 	set_name VARCHAR(50) UNIQUE NOT NULL,
+	question1 VARCHAR(255) DEFAULT 'N/A',
+	question2 VARCHAR(255) DEFAULT 'N/A',
+	question3 VARCHAR(255) DEFAULT 'N/A',
+	question4 VARCHAR(255) DEFAULT 'N/A',
+	question5 VARCHAR(255) DEFAULT 'N/A',
+	question6 VARCHAR(255) DEFAULT 'N/A',
+	question7 VARCHAR(255) DEFAULT 'N/A',
+	question8 VARCHAR(255) DEFAULT 'N/A',
+	question9 VARCHAR(255) DEFAULT 'N/A',
+	question10 VARCHAR(255) DEFAULT 'N/A',	
 	PRIMARY KEY (id)
 );
+
+
+-- feedback response log
+-- extract feedback responses for current running course
+CREATE TABLE feedback_responses(
+	id SERIAL NOT NULL,
+	course_id VARCHAR(10),
+	feedback_set_id INTEGER,
+	question1 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question2 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question3 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question4 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question5 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question6 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question7 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question8 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question9 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	question10 INTEGER[] DEFAULT ARRAY_FILL(0, ARRAY[5]),
+	FOREIGN KEY (feedback_set_id) REFERENCES feedback_sets(id),
+	PRIMARY KEY (id)
+);
+
 
 -- course details, 
 -- used to extract details of given course, 
@@ -95,22 +128,12 @@ CREATE TABLE course_details (
 	eligile_batches VARCHAR(20)[],
 	start_time DATE,
 	end_time DATE,
-	feedback_set_id INTEGER,
+	feedback_response_id INTEGER,
 	PRIMARY KEY (course_id),
 	FOREIGN KEY (instructor_id, instructor_name) REFERENCES instructor_details(user_id, user_name),
-	FOREIGN KEY (feedback_set_id) REFERENCES feedback_sets (id)
+	FOREIGN KEY (feedback_response_id) REFERENCES feedback_responses(id)
 );
 
--- feedback questions (All quetions from all feedback sets are stored in this table)
--- used to extract questions of a feedback set, given feedback id
-CREATE TABLE feedback_questions(
-	question_id SERIAL NOT NULL,
-	feedback_set_id INTEGER NOT NULL,
-	question VARCHAR(255),
-	ratings_count INT[],
-	PRIMARY KEY(question_id),
-	FOREIGN KEY(feedback_set_id) REFERENCES feedback_sets(id)
-);
 
 -- messages (sender side details)
 CREATE TABLE messages (
@@ -162,6 +185,7 @@ CREATE TABLE instructor_courses(
 -- used to extract registered courses of a given student(completed and running)
 -- used to extract registered students of a given course and its status(say running)
 -- used to extract grades information
+-- status = course completion status = grade allocation status
 CREATE TABLE student_courses(
 	course_id VARCHAR(50),
 	student_id VARCHAR(50),
@@ -171,12 +195,17 @@ CREATE TABLE student_courses(
 	room VARCHAR(50),
 	type VARCHAR(50),
 	credits INT,
-	status VARCHAR(50),
+	status INT,
 	grade VARCHAR(50),
 	FOREIGN KEY(student_id) REFERENCES student_details(user_id),
 	FOREIGN KEY(course_id) REFERENCES course_details(course_id)
 );
 
+
+-- stores the course history
+-- previous instructors
+-- previous course start and end times
+-- previous course feedback responses
 CREATE TABLE course_log(
 	log_id SERIAL NOT NULL,
 	course_id VARCHAR(50),
@@ -185,7 +214,21 @@ CREATE TABLE course_log(
 	end_time DATE,
 	instructor_id VARCHAR(50),
 	instructor_name VARCHAR(50),
+	feedback_response_id INTEGER,
 	PRIMARY KEY(log_id),
 	FOREIGN KEY(course_id) REFERENCES course_details(course_id),
-	FOREIGN KEY(instructor_id, instructor_name) REFERENCES instructor_details (user_id, user_name)
+	FOREIGN KEY(instructor_id, instructor_name) REFERENCES instructor_details (user_id, user_name),
+	FOREIGN KEY (feedback_response_id) REFERENCES feedback_responses (id)
+);
+
+
+-- action type ==> 1:Course Registration; 2: Feedback Submission; 3:Grade Submission
+CREATE TABLE custom_access_log(
+	log_id SERIAL NOT NULL,
+	actionType INT,
+	start_time TIMESTAMP,
+	end_time TIMESTAMP,
+	batch_id VARCHAR(10),
+	PRIMARY KEY(log_id),
+	FOREIGN KEY(batch_id) REFERENCES batches(batch_id)
 );
