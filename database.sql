@@ -22,9 +22,9 @@ DROP TABLE IF EXISTS custom_access_log;
 -- batch a user could possible belong to
 CREATE TABLE batches(
 	batch_id VARCHAR(10) UNIQUE NOT NULL,
-	department VARCHAR(50),
-	year INT,
-	batch VARCHAR(50), --btech or mtech
+	department VARCHAR(50) DEFAULT 'NONE',
+	year INT DEFAULT 0,
+	batch VARCHAR(50) DEFAULT 'NONE', --btech or mtech
 	PRIMARY KEY(batch_id)
 );
 
@@ -49,7 +49,8 @@ CREATE TABLE student_details(
 	CGPA INTEGER,
 	isActive INTEGER,
 	PRIMARY KEY(user_id),
-	FOREIGN KEY (user_id, user_name) REFERENCES user_login (user_id, user_name)
+	FOREIGN KEY (user_id, user_name) REFERENCES user_login (user_id, user_name),
+	FOREIGN KEY (batch) REFERENCES batches(batch_id)
 );
 
 CREATE TABLE instructor_details(
@@ -58,8 +59,10 @@ CREATE TABLE instructor_details(
 	department VARCHAR(50),
 	qualification VARCHAR(100),
 	isActive INTEGER,
+	batch VARCHAR(50),
 	PRIMARY KEY(user_id, user_name),
-	FOREIGN KEY(user_id, user_name) REFERENCES user_login (user_id, user_name)
+	FOREIGN KEY(user_id, user_name) REFERENCES user_login (user_id, user_name),
+	FOREIGN KEY (batch) REFERENCES batches(batch_id)
 );
 
 CREATE TABLE admin_details(

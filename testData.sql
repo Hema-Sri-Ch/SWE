@@ -5,22 +5,26 @@ DELETE FROM user_login;
 DELETE FROM feedback_sets;
 DELETE FROM course_details;
 
+
+INSERT INTO batches(batch_id, department, year, batch) VALUES ('CS21BTECH', 'CS', '21', 'BTECH');
+INSERT INTO batches(batch_id) VALUES ('FA');
+
 INSERT INTO user_login(user_id, user_name, password, user_mail, user_type) values ('AD01', 'Admin A', '123123', 'hello022004@gmail.com', 'AD');
 INSERT INTO admin_details values ('AD01', 'Admin A', 1);
 
 INSERT INTO user_login(user_id, user_name, password, user_mail, user_type) values ('CS21BTECH11013', 'Hema Sri', '123123', 'hello022004@gmail.com', 'ST');
-INSERT INTO student_details values ('CS21BTECH11013', 'Hema Sri', '6', 'CS', 'BTECH', 9, 1);
+INSERT INTO student_details values ('CS21BTECH11013', 'Hema Sri', '6', 'CS', 'CS21BTECH', 9, 1);
 
 
 INSERT INTO user_login(user_id, user_name, password, user_mail, user_type) values ('CS21BTECH11012', 'Akshay', '123123', 'hello022004@gmail.com', 'ST');
-INSERT INTO student_details values ('CS21BTECH11012', 'Akshay', '6', 'CS', 'BTECH', 9, 1);
+INSERT INTO student_details values ('CS21BTECH11012', 'Akshay', '6', 'CS', 'CS21BTECH', 9, 1);
 
 
 INSERT INTO user_login(user_id, user_name, password, user_mail, user_type) values ('FA001', 'Faculty A', '123123', 'hello022004@gmail.com', 'FA');
-INSERT INTO instructor_details values ('FA001', 'Faculty A', 'CS', 'phD in CS', 1);
+INSERT INTO instructor_details values ('FA001', 'Faculty A', 'CS', 'phD in CS', 1, 'FA');
 
 INSERT INTO user_login(user_id, user_name, password, user_mail, user_type) values ('FA002', 'Faculty B', '123123', 'hello022004@gmail.com', 'FA');
-INSERT INTO instructor_details values ('FA002', 'Faculty B', 'CS', 'phD in CS', 1);
+INSERT INTO instructor_details values ('FA002', 'Faculty B', 'CS', 'phD in CS', 1, 'FA');
 
 INSERT INTO feedback_sets(set_name) values ('SET A');
 INSERT INTO feedback_responses(course_id, feedback_set_id) VALUES ('C001', 1);
@@ -97,3 +101,6 @@ INSERT INTO course_log (
 	'Faculty B',
 	2
 );
+
+INSERT INTO student_courses (student_id, course_id, status) VALUES ('CS21BTECH11013', 'C001', 1);
+INSERT INTO student_courses (student_id, course_id, status) VALUES ('CS21BTECH11012', 'C001', 1);

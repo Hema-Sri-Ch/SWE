@@ -27,6 +27,11 @@ import {
     getSentMessages,
 } from "../controllers/display_info.js";
 
+import { 
+    adminMsg, 
+    instructorMsg 
+} from "../controllers/messages.js";
+
 const router = express.Router();
 
 
@@ -49,4 +54,7 @@ router.get('/activecourses', accessControl, getActiveCourses);
 router.get('/receivedmessages/:id', accessControl, getReceivedMessages);
 router.get('/sentmessages/:id', accessControl, getSentMessages);
 router.get('/messagereceivers', accessControl, getMessageReceivers);
+
+router.post('/adminmessage', accessControl, adminMsg);
+router.post('/instructormessage', accessControl, instructorMsg);
 export default router;
