@@ -5,9 +5,35 @@ DELETE FROM user_login;
 DELETE FROM feedback_sets;
 DELETE FROM course_details;
 
+INSERT INTO rooms(room_id) VALUES ('ALH-1');
+INSERT INTO rooms(room_id) VALUES ('ALH-2');
+INSERT INTO rooms(room_id) VALUES ('B512');
+INSERT INTO rooms(room_id) VALUES ('A101');
+INSERT INTO rooms(room_id) VALUES ('A117');
+
+INSERT INTO slots(slot_id) VALUES ('A');
+INSERT INTO slots(slot_id) VALUES ('B');
+INSERT INTO slots(slot_id) VALUES ('C');
+INSERT INTO slots(slot_id) VALUES ('D');
+INSERT INTO slots(slot_id) VALUES ('E');
+INSERT INTO slots(slot_id) VALUES ('F');
+INSERT INTO slots(slot_id) VALUES ('G');
+INSERT INTO slots(slot_id) VALUES ('H');
+
+INSERT INTO grades(grade) VALUES('A');
+INSERT INTO grades(grade) VALUES('A-');
+INSERT INTO grades(grade) VALUES('B');
+INSERT INTO grades(grade) VALUES('B-');
+INSERT INTO grades(grade) VALUES('C');
+INSERT INTO grades(grade) VALUES('C-');
+INSERT INTO grades(grade) VALUES('D');
+INSERT INTO grades(grade) VALUES('D-');
+INSERT INTO grades(grade) VALUES('F');
+
 
 INSERT INTO batches(batch_id, department, year, batch) VALUES ('CS21BTECH', 'CS', '21', 'BTECH');
 INSERT INTO batches(batch_id) VALUES ('FA');
+INSERT INTO batches(batch_id) VALUES ('AD');
 
 INSERT INTO user_login(user_id, user_name, password, user_mail, user_type) values ('AD01', 'Admin A', '123123', 'hello022004@gmail.com', 'AD');
 INSERT INTO admin_details values ('AD01', 'Admin A', 1);
@@ -42,17 +68,19 @@ INSERT INTO course_details (
     course_description,
     course_syllabus,
     prereq_cids,
-    eligile_batches,
+    eligible_batches,
     start_time,
     end_time,
-    feedback_response_id
+    feedback_set_id,
+    feedback_response_id,
+    current_log_id
 ) VALUES (
     'C001',
     'Introduction to Programming',
     'Faculty A',
     'FA001',
-    'A1',
-    'Room 101',
+    'A',
+    'ALH-1',
     3,
     30,
     0,
@@ -62,6 +90,8 @@ INSERT INTO course_details (
     ARRAY['B001', 'B002'],
     '2024-05-01',
     '2024-08-01',
+    1,
+    1,
     1
 );
 
@@ -102,5 +132,60 @@ INSERT INTO course_log (
 	2
 );
 
-INSERT INTO student_courses (student_id, course_id, status) VALUES ('CS21BTECH11013', 'C001', 1);
-INSERT INTO student_courses (student_id, course_id, status) VALUES ('CS21BTECH11012', 'C001', 1);
+INSERT INTO instructor_courses(course_log_id, instructor_id, course_id, status) VALUES (1, 'FA001', 'C001', 1);
+INSERT INTO electives(student_id) VALUES ('CS21BTECH11013');
+INSERT INTO electives(student_id) VALUES ('CS21BTECH11012');
+
+INSERT INTO student_courses (course_log_id, student_id, course_id, status, type, credits) VALUES (1, 'CS21BTECH11013', 'C001', 0, 'elective_A', 3);
+INSERT INTO student_courses (course_log_id, student_id, course_id, status, type, credits) VALUES (1, 'CS21BTECH11012', 'C001', 0, 'elective_A', 3);
+
+
+INSERT INTO feedback_sets(set_name, 
+	q1,
+	q2,
+	q3,
+	q4,
+	q5,
+	q6,
+	q7,
+	q8,
+	q9,
+	q10
+) VALUES (
+	'set A',
+	'ABCD',
+	'EFGH',
+	'ABCD',
+	'EFGH',
+	'1234',
+	'5678',
+	'1234',
+	'5678',
+	'xyz',
+	'pqr'
+);
+
+INSERT INTO feedback_sets(set_name, 
+	q1,
+	q2,
+	q3,
+	q4,
+	q5,
+	q6,
+	q7,
+	q8,
+	q9,
+	q10
+) VALUES (
+	'set B',
+	'ABCD',
+	'EFGH',
+	'ABCD',
+	'EFGH',
+	'1234',
+	'5678',
+	'1234',
+	'5678',
+	'xyz',
+	'pqr'
+);

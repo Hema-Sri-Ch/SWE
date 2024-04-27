@@ -12,14 +12,17 @@ export const adminMsg = async (req, res) => {
             const postgresTimestamp = currentDate.toISOString(); // Using ISO format for timestamp
             
             await client.query('BEGIN'); // Begin transaction
-            
-            const messageInsertQuery = "INSERT INTO messages (message, user_id, time) VALUES ($1, $2, $3) RETURNING msg_id";
-            const messageInsertValues = [req.body.text, req.body.id, postgresTimestamp];
+            const messageHead = req.body.bid + ": " +req.body.title;
+            const messageInsertQuery = "INSERT INTO messages (msg_head, message, user_id, time) VALUES ($1, $2, $3, $4) RETURNING msg_id";
+            const messageInsertValues = [messageHead, req.body.text, req.body.id, postgresTimestamp];
             const messageResult = await client.query(messageInsertQuery, messageInsertValues);
             const messageId = messageResult.rows[0].msg_id;
             
-            const receiversInsertQuery = "INSERT INTO receivers (msg_id, user_id) SELECT $1 as msg_id, user_id FROM student_details WHERE batch = $2";
-            const receiversInsertValues = [messageId, req.body.bid];
+            var receiversInsertQuery;
+            if(req.body.bid == "FA") receiversInsertQuery =  "INSERT INTO receivers (msg_id, user_id) SELECT $1 as msg_id, user_id FROM instructor_details";
+            else if(req.body.bid == 'AD') receiversInsertQuery = "INSERT INTO receivers (msg_id, user_id) SELECT $1 as msg_id, user_id FROM admin_details";
+            else receiversInsertQuery = "INSERT INTO receivers (msg_id, user_id) SELECT $1 as msg_id, user_id FROM student_details WHERE batch = $2";
+            var receiversInsertValues = [messageId, req.body.bid];
             await client.query(receiversInsertQuery, receiversInsertValues);
             
             await client.query('COMMIT'); // Commit transaction
@@ -39,14 +42,17 @@ export const adminMsg = async (req, res) => {
 
 export const instructorMsg = async(req, res) => {
     const client = await pool.connect();
+    req.user_type = 1;
     try {
+        console.log(`function called`)
         if(req.user_type == 1){
             const currentDate = new Date();
             const postgresTimestamp = currentDate.toISOString(); // Using ISO format for timestamp
             
             await client.query('BEGIN'); // Begin transaction
-            const messageInsertQuery = "INSERT INTO messages (message, user_id, time) VALUES ($1, $2, $3) RETURNING msg_id";
-            const messageInsertValues = [req.body.text, req.body.id, postgresTimestamp];
+            const messageHead = req.body.cid + ": " +req.body.title;
+            const messageInsertQuery = "INSERT INTO messages (msg_head, message, user_id, time) VALUES ($1, $2, $3, $4) RETURNING msg_id";
+            const messageInsertValues = [messageHead, req.body.text, req.body.id, postgresTimestamp];
             const messageResult = await client.query(messageInsertQuery, messageInsertValues);
             const messageId = messageResult.rows[0].msg_id;
 
